@@ -1,4 +1,4 @@
-package com.chatapp.backend.admin.dto;
+package com.chatapp.backend.admin.user.dto;
 
 import com.chatapp.backend.user.entity.Role;
 import io.swagger.v3.oas.annotations.media.Schema;

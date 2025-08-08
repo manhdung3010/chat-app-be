@@ -1,8 +1,8 @@
-package com.chatapp.backend.admin.service;
+package com.chatapp.backend.admin.user.service;
 
-import com.chatapp.backend.admin.dto.CreateUserRequest;
-import com.chatapp.backend.admin.dto.UpdateUserRequest;
-import com.chatapp.backend.admin.dto.UserDto;
+import com.chatapp.backend.admin.user.dto.CreateUserRequest;
+import com.chatapp.backend.admin.user.dto.UpdateUserRequest;
+import com.chatapp.backend.admin.user.dto.UserDto;
 import com.chatapp.backend.common.exception.UserNotFoundException;
 import com.chatapp.backend.user.entity.User;
 import com.chatapp.backend.user.repository.UserRepository;

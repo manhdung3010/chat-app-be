@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
-@RestControllerAdvice(basePackages = {"com.chatapp.backend.auth.controller", "com.chatapp.backend.common.controller", "com.chatapp.backend.admin.controller"})
+@RestControllerAdvice(basePackages = {"com.chatapp.backend.auth.controller", "com.chatapp.backend.common.controller", "com.chatapp.backend.admin.controller", "com.chatapp.backend.admin.user.controller"})
 public class GlobalExceptionHandler {
     
     @ExceptionHandler(MethodArgumentNotValidException.class)

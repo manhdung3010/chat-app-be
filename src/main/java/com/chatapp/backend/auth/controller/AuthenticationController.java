@@ -39,10 +39,4 @@ public class AuthenticationController {
     public ResponseEntity<AuthResponse> refreshToken(@Valid @RequestBody RefreshTokenRequest request) {
         return ResponseEntity.ok(authenticationService.refreshToken(request));
     }
-    
-    @GetMapping("/test")
-    @Operation(summary = "Test authentication endpoint", description = "Simple test endpoint to verify authentication service is working")
-    public ResponseEntity<String> test() {
-        return ResponseEntity.ok("Authentication endpoint is working!");
-    }
 }
