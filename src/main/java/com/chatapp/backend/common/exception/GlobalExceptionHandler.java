@@ -1,8 +1,7 @@
 package com.chatapp.backend.common.exception;
 
+import com.chatapp.backend.common.annotations.ApiResponseGroups;
 import com.chatapp.backend.common.constants.AppConstants;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -19,9 +18,7 @@ import java.util.Map;
 public class GlobalExceptionHandler {
     
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "400", description = "Validation failed")
-    })
+    @ApiResponseGroups.ValidationErrorResponse
     public ResponseEntity<ErrorResponse> handleValidationExceptions(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
         ex.getBindingResult().getAllErrors().forEach((error) -> {
@@ -42,9 +39,7 @@ public class GlobalExceptionHandler {
     }
     
     @ExceptionHandler(BadCredentialsException.class)
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "401", description = "Invalid credentials")
-    })
+    @ApiResponseGroups.AuthenticationErrorResponse
     public ResponseEntity<ErrorResponse> handleBadCredentialsException(BadCredentialsException ex) {
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
@@ -57,9 +52,7 @@ public class GlobalExceptionHandler {
     }
     
     @ExceptionHandler(UserNotFoundException.class)
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "404", description = "User not found")
-    })
+    @ApiResponseGroups.NotFoundErrorResponse
     public ResponseEntity<ErrorResponse> handleUserNotFoundException(UserNotFoundException ex) {
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
@@ -72,9 +65,7 @@ public class GlobalExceptionHandler {
     }
     
     @ExceptionHandler(RuntimeException.class)
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "400", description = "Runtime error")
-    })
+    @ApiResponseGroups.RuntimeErrorResponse
     public ResponseEntity<ErrorResponse> handleRuntimeException(RuntimeException ex) {
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
@@ -87,9 +78,7 @@ public class GlobalExceptionHandler {
     }
     
     @ExceptionHandler(Exception.class)
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "500", description = "Internal server error")
-    })
+    @ApiResponseGroups.ServerErrorResponse
     public ResponseEntity<ErrorResponse> handleGenericException(Exception ex) {
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .timestamp(LocalDateTime.now())

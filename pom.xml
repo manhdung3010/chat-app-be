@@ -108,6 +108,14 @@
 			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
 			<version>2.7.0</version>
 		</dependency>
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-database-postgresql</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -140,6 +148,24 @@
 						</exclude>
 					</excludes>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.flywaydb</groupId>
+				<artifactId>flyway-maven-plugin</artifactId>
+				<version>11.7.2</version>
+				<configuration>
+					<url>jdbc:postgresql://localhost:5432/chatapp</url>
+					<user>admin</user>
+					<password>123456</password>
+					<cleanDisabled>false</cleanDisabled>
+				</configuration>
+				<dependencies>
+					<dependency>
+						<groupId>org.postgresql</groupId>
+						<artifactId>postgresql</artifactId>
+						<version>42.7.3</version>
+					</dependency>
+				</dependencies>
 			</plugin>
 		</plugins>
 	</build>

@@ -1,8 +1,9 @@
 package com.chatapp.backend.admin.controller;
 
+import com.chatapp.backend.common.annotations.ApiResponseGroups;
+import com.chatapp.backend.common.constants.HttpStatusCodes;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
@@ -23,11 +24,8 @@ public class AdminController {
         summary = "Admin dashboard",
         description = "Admin dashboard endpoint - only accessible by admin users"
     )
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Successfully retrieved dashboard"),
-        @ApiResponse(responseCode = "401", description = "Unauthorized - Bearer token required"),
-        @ApiResponse(responseCode = "403", description = "Forbidden - Admin role required")
-    })
+    @ApiResponseGroups.AdminAuthResponses
+    @ApiResponse(responseCode = HttpStatusCodes.OK, description = "Successfully retrieved dashboard")
     public ResponseEntity<String> getDashboard() {
         return ResponseEntity.ok("Welcome to Admin Dashboard!");
     }
@@ -37,11 +35,8 @@ public class AdminController {
         summary = "System statistics",
         description = "Get system statistics - admin only"
     )
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Successfully retrieved statistics"),
-        @ApiResponse(responseCode = "401", description = "Unauthorized - Bearer token required"),
-        @ApiResponse(responseCode = "403", description = "Forbidden - Admin role required")
-    })
+    @ApiResponseGroups.AdminAuthResponses
+    @ApiResponse(responseCode = HttpStatusCodes.OK, description = "Successfully retrieved statistics")
     public ResponseEntity<String> getSystemStats() {
         return ResponseEntity.ok("System statistics (admin only)");
     }

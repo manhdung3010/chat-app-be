@@ -35,7 +35,8 @@ public class SecurityConfig {
     // Public paths that don't require authentication
     private static final String[] PUBLIC_PATHS = {
             AppConstants.AUTH_PATH + "/**",
-            "/error"
+            "/error",
+            "/ws/**"  // WebSocket endpoints
     };
     
     // Swagger/OpenAPI documentation paths (only in development)
