@@ -27,6 +27,13 @@ public final class MessageConstants {
     public static final String USER_PROMOTED = "Thăng cấp người dùng thành công";
     public static final String USER_DEMOTED = "Hạ cấp người dùng thành công";
     
+    // Message management messages
+    public static final String MESSAGES_RETRIEVED = "Lấy tin nhắn thành công";
+    public static final String MESSAGE_DELETED = "Xóa tin nhắn thành công";
+    public static final String UNREAD_COUNT_RETRIEVED = "Lấy số tin nhắn chưa đọc thành công";
+    public static final String UNREAD_MESSAGES_RETRIEVED = "Lấy danh sách tin nhắn chưa đọc thành công";
+    public static final String LATEST_MESSAGES_RETRIEVED = "Lấy tin nhắn gần nhất thành công";
+    
     // Error messages
     public static final String ERROR_VALIDATION = "Dữ liệu không hợp lệ";
     public static final String ERROR_NOT_FOUND = "Không tìm thấy dữ liệu";

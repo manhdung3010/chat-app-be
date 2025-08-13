@@ -2,7 +2,7 @@ package com.chatapp.backend.auth.config;
 
 import com.chatapp.backend.auth.jwt.JwtAuthenticationFilter;
 import com.chatapp.backend.common.constants.AppConstants;
-import com.chatapp.backend.user.service.CustomUserDetailsService;
+import com.chatapp.backend.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,7 +30,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class SecurityConfig {
     
     private final JwtAuthenticationFilter jwtAuthFilter;
-    private final CustomUserDetailsService userDetailsService;
+    private final UserService userService;
     
     // Public paths that don't require authentication
     private static final String[] PUBLIC_PATHS = {
@@ -76,7 +76,7 @@ public class SecurityConfig {
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(userDetailsService);
+        authProvider.setUserDetailsService(userService);
         authProvider.setPasswordEncoder(passwordEncoder());
         return authProvider;
     }

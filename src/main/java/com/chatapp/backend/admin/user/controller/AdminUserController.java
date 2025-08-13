@@ -9,13 +9,14 @@ import com.chatapp.backend.common.constants.AppConstants;
 import com.chatapp.backend.common.constants.HttpStatusCodes;
 import com.chatapp.backend.common.constants.MessageConstants;
 import com.chatapp.backend.common.dto.ApiResponse;
+import com.chatapp.backend.common.utils.ResponseUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -35,10 +36,7 @@ public class AdminUserController {
     private final AdminUserService adminUserService;
     
     @GetMapping
-    @Operation(
-        summary = "Get all users",
-        description = "Retrieve list of all users in the system - Admin only"
-    )
+    @Operation(summary = "Get all users", description = "Retrieve list of all users in the system - Admin only")
     @ApiResponseGroups.AdminAuthResponses
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = HttpStatusCodes.OK, description = "Successfully retrieved users")
     public ResponseEntity<ApiResponse<List<UserDto>>> getAllUsers() {
@@ -46,88 +44,78 @@ public class AdminUserController {
         return ResponseEntity.ok(ApiResponse.success(users, MessageConstants.USERS_RETRIEVED));
     }
     
+    @GetMapping("/paginated")
+    @Operation(summary = "Get paginated users", description = "Retrieve paginated list of users with sorting and pagination - Admin only")
+    @ApiResponseGroups.AdminAuthResponses
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = HttpStatusCodes.OK, description = "Successfully retrieved paginated users")
+    public ResponseEntity<ApiResponse<List<UserDto>>> getPaginatedUsers(
+            @Parameter(description = "Page number (1-based)", example = "1") @RequestParam(defaultValue = "1") int page,
+            @Parameter(description = "Page size", example = "10") @RequestParam(defaultValue = "10") int size,
+            @Parameter(description = "Sort field", example = "createdAt") @RequestParam(defaultValue = "createdAt") String sortBy,
+            @Parameter(description = "Sort direction (ASC/DESC)", example = "DESC") @RequestParam(defaultValue = "DESC") String sortDirection) {
+        
+        Page<UserDto> pageResult = adminUserService.getAllUsersPaginated(page, size, sortBy, sortDirection);
+        return ResponseEntity.ok(ResponseUtils.createPaginatedResponse(pageResult, page, size, MessageConstants.USERS_RETRIEVED));
+    }
+    
     @GetMapping("/{id}")
-    @Operation(
-        summary = "Get user by ID",
-        description = "Retrieve user details by user ID - Admin only"
-    )
+    @Operation(summary = "Get user by ID", description = "Retrieve user details by user ID - Admin only")
     @ApiResponseGroups.AdminCrudResponses
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = HttpStatusCodes.OK, description = "Successfully retrieved user")
     public ResponseEntity<ApiResponse<UserDto>> getUserById(
-            @Parameter(description = "User ID", example = "123e4567-e89b-12d3-a456-426614174000")
-            @PathVariable UUID id) {
+            @Parameter(description = "User ID", example = "123e4567-e89b-12d3-a456-426614174000") @PathVariable UUID id) {
         UserDto user = adminUserService.getUserById(id);
         return ResponseEntity.ok(ApiResponse.success(user, MessageConstants.USER_RETRIEVED));
     }
     
     @PostMapping
-    @Operation(
-        summary = "Create new user",
-        description = "Create a new user account - Admin only"
-    )
+    @Operation(summary = "Create new user", description = "Create a new user account - Admin only")
     @ApiResponseGroups.AdminCreateResponses
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = HttpStatusCodes.CREATED, description = "User created successfully")
-    public ResponseEntity<ApiResponse<UserDto>> createUser(
-            @Valid @RequestBody CreateUserRequest request) {
+    public ResponseEntity<ApiResponse<UserDto>> createUser(@Valid @RequestBody CreateUserRequest request) {
         UserDto createdUser = adminUserService.createUser(request);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.created(createdUser, MessageConstants.USER_CREATED));
     }
     
     @PutMapping("/{id}")
-    @Operation(
-        summary = "Update user",
-        description = "Update existing user information - Admin only"
-    )
+    @Operation(summary = "Update user", description = "Update existing user information - Admin only")
     @ApiResponseGroups.AdminUpdateResponses
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = HttpStatusCodes.OK, description = "User updated successfully")
     public ResponseEntity<ApiResponse<UserDto>> updateUser(
-            @Parameter(description = "User ID", example = "123e4567-e89b-12d3-a456-426614174000")
-            @PathVariable UUID id,
+            @Parameter(description = "User ID", example = "123e4567-e89b-12d3-a456-426614174000") @PathVariable UUID id,
             @Valid @RequestBody UpdateUserRequest request) {
         UserDto updatedUser = adminUserService.updateUser(id, request);
         return ResponseEntity.ok(ApiResponse.success(updatedUser, MessageConstants.USER_UPDATED));
     }
     
     @DeleteMapping("/{id}")
-    @Operation(
-        summary = "Delete user",
-        description = "Delete user by ID - Admin only"
-    )
+    @Operation(summary = "Delete user", description = "Delete user by ID - Admin only")
     @ApiResponseGroups.AdminCrudResponses
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = HttpStatusCodes.NO_CONTENT, description = "User deleted successfully")
     public ResponseEntity<ApiResponse<Void>> deleteUser(
-            @Parameter(description = "User ID", example = "123e4567-e89b-12d3-a456-426614174000")
-            @PathVariable UUID id) {
+            @Parameter(description = "User ID", example = "123e4567-e89b-12d3-a456-426614174000") @PathVariable UUID id) {
         adminUserService.deleteUser(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT)
                 .body(ApiResponse.noContent(MessageConstants.USER_DELETED));
     }
     
     @PatchMapping("/{id}/promote")
-    @Operation(
-        summary = "Promote user to admin",
-        description = "Promote user to admin role - Admin only"
-    )
+    @Operation(summary = "Promote user to admin", description = "Promote user to admin role - Admin only")
     @ApiResponseGroups.AdminCrudResponses
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = HttpStatusCodes.OK, description = "User promoted successfully")
     public ResponseEntity<ApiResponse<UserDto>> promoteToAdmin(
-            @Parameter(description = "User ID", example = "123e4567-e89b-12d3-a456-426614174000")
-            @PathVariable UUID id) {
+            @Parameter(description = "User ID", example = "123e4567-e89b-12d3-a456-426614174000") @PathVariable UUID id) {
         UserDto promotedUser = adminUserService.promoteToAdmin(id);
         return ResponseEntity.ok(ApiResponse.success(promotedUser, MessageConstants.USER_PROMOTED));
     }
     
     @PatchMapping("/{id}/demote")
-    @Operation(
-        summary = "Demote admin to user",
-        description = "Demote admin to user role - Admin only"
-    )
+    @Operation(summary = "Demote admin to user", description = "Demote admin to user role - Admin only")
     @ApiResponseGroups.AdminCrudResponses
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = HttpStatusCodes.OK, description = "User demoted successfully")
     public ResponseEntity<ApiResponse<UserDto>> demoteToUser(
-            @Parameter(description = "User ID", example = "123e4567-e89b-12d3-a456-426614174000")
-            @PathVariable UUID id) {
+            @Parameter(description = "User ID", example = "123e4567-e89b-12d3-a456-426614174000") @PathVariable UUID id) {
         UserDto demotedUser = adminUserService.demoteToUser(id);
         return ResponseEntity.ok(ApiResponse.success(demotedUser, MessageConstants.USER_DEMOTED));
     }

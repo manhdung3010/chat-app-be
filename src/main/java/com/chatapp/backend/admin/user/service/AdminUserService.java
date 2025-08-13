@@ -9,6 +9,10 @@ import com.chatapp.backend.user.entity.Role;
 import com.chatapp.backend.user.entity.User;
 import com.chatapp.backend.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -29,68 +33,27 @@ public class AdminUserService {
                 .collect(Collectors.toList());
     }
     
+    public Page<UserDto> getAllUsersPaginated(int page, int size, String sortBy, String sortDirection) {
+        Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
+        Pageable pageable = PageRequest.of(page - 1, size, sort);
+        return userRepository.findAll(pageable).map(this::mapToDto);
+    }
+    
     public UserDto getUserById(UUID id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException(id));
+        User user = findUserById(id);
         return mapToDto(user);
     }
     
     public UserDto createUser(CreateUserRequest request) {
-        // Check if user already exists
-        if (userRepository.existsByUsername(request.getUsername())) {
-            throw new RuntimeException(MessageConstants.ERROR_USERNAME_EXISTS);
-        }
-        
-        if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException(MessageConstants.ERROR_EMAIL_EXISTS);
-        }
-        
-        // Create new user
-        User user = User.builder()
-                .username(request.getUsername())
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .avatar(request.getAvatar())
-                .role(request.getRole())
-                .build();
-        
+        validateUserCreation(request);
+        User user = buildUserFromRequest(request);
         User savedUser = userRepository.save(user);
         return mapToDto(savedUser);
     }
     
     public UserDto updateUser(UUID id, UpdateUserRequest request) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException(id));
-        
-        // Check username uniqueness if changed
-        if (request.getUsername() != null && !request.getUsername().equals(user.getUsername())) {
-            if (userRepository.existsByUsername(request.getUsername())) {
-                throw new RuntimeException(MessageConstants.ERROR_USERNAME_EXISTS);
-            }
-            user.setUsername(request.getUsername());
-        }
-        
-        // Check email uniqueness if changed
-        if (request.getEmail() != null && !request.getEmail().equals(user.getEmail())) {
-            if (userRepository.existsByEmail(request.getEmail())) {
-                throw new RuntimeException(MessageConstants.ERROR_EMAIL_EXISTS);
-            }
-            user.setEmail(request.getEmail());
-        }
-        
-        // Update other fields
-        if (request.getPassword() != null) {
-            user.setPassword(passwordEncoder.encode(request.getPassword()));
-        }
-        
-        if (request.getAvatar() != null) {
-            user.setAvatar(request.getAvatar());
-        }
-        
-        if (request.getRole() != null) {
-            user.setRole(request.getRole());
-        }
-        
+        User user = findUserById(id);
+        updateUserFields(user, request);
         User updatedUser = userRepository.save(user);
         return mapToDto(updatedUser);
     }
@@ -103,21 +66,70 @@ public class AdminUserService {
     }
     
     public UserDto promoteToAdmin(UUID id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException(id));
-        
+        User user = findUserById(id);
         user.setRole(Role.ADMIN);
         User updatedUser = userRepository.save(user);
         return mapToDto(updatedUser);
     }
     
     public UserDto demoteToUser(UUID id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException(id));
-        
+        User user = findUserById(id);
         user.setRole(Role.USER);
         User updatedUser = userRepository.save(user);
         return mapToDto(updatedUser);
+    }
+    
+    // Helper methods
+    private User findUserById(UUID id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException(id));
+    }
+    
+    private void validateUserCreation(CreateUserRequest request) {
+        if (userRepository.existsByUsername(request.getUsername())) {
+            throw new RuntimeException(MessageConstants.ERROR_USERNAME_EXISTS);
+        }
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new RuntimeException(MessageConstants.ERROR_EMAIL_EXISTS);
+        }
+    }
+    
+    private User buildUserFromRequest(CreateUserRequest request) {
+        return User.builder()
+                .username(request.getUsername())
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .avatar(request.getAvatar())
+                .role(request.getRole())
+                .build();
+    }
+    
+    private void updateUserFields(User user, UpdateUserRequest request) {
+        if (request.getUsername() != null && !request.getUsername().equals(user.getUsername())) {
+            if (userRepository.existsByUsername(request.getUsername())) {
+                throw new RuntimeException(MessageConstants.ERROR_USERNAME_EXISTS);
+            }
+            user.setUsername(request.getUsername());
+        }
+        
+        if (request.getEmail() != null && !request.getEmail().equals(user.getEmail())) {
+            if (userRepository.existsByEmail(request.getEmail())) {
+                throw new RuntimeException(MessageConstants.ERROR_EMAIL_EXISTS);
+            }
+            user.setEmail(request.getEmail());
+        }
+        
+        if (request.getPassword() != null) {
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
+        }
+        
+        if (request.getAvatar() != null) {
+            user.setAvatar(request.getAvatar());
+        }
+        
+        if (request.getRole() != null) {
+            user.setRole(request.getRole());
+        }
     }
     
     private UserDto mapToDto(User user) {

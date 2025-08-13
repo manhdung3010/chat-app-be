@@ -7,7 +7,7 @@ public final class AppConstants {
     public static final String AUTH_PATH = API_BASE_PATH + "/auth";
     public static final String MESSAGE_PATH = API_BASE_PATH + "/messages";
     public static final String ADMIN_USER_PATH = API_BASE_PATH + "/admin/users";
-    public static final String TEST_PATH = API_BASE_PATH + "/test";
+    public static final String USER_PATH = API_BASE_PATH + "/users";
     
     // Swagger/OpenAPI Paths
     public static final String SWAGGER_UI_PATH = "/swagger-ui";
