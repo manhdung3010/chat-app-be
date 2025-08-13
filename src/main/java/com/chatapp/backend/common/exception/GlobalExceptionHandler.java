@@ -1,7 +1,8 @@
 package com.chatapp.backend.common.exception;
 
 import com.chatapp.backend.common.annotations.ApiResponseGroups;
-import com.chatapp.backend.common.constants.AppConstants;
+import com.chatapp.backend.common.constants.MessageConstants;
+import com.chatapp.backend.common.dto.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -10,16 +11,15 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
-@RestControllerAdvice(basePackages = {"com.chatapp.backend.auth.controller", "com.chatapp.backend.common.controller", "com.chatapp.backend.admin.controller", "com.chatapp.backend.admin.user.controller"})
+@RestControllerAdvice()
 public class GlobalExceptionHandler {
     
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ApiResponseGroups.ValidationErrorResponse
-    public ResponseEntity<ErrorResponse> handleValidationExceptions(MethodArgumentNotValidException ex) {
+    public ResponseEntity<ApiResponse<Map<String, String>>> handleValidationExceptions(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
         ex.getBindingResult().getAllErrors().forEach((error) -> {
             String fieldName = ((FieldError) error).getField();
@@ -27,66 +27,40 @@ public class GlobalExceptionHandler {
             errors.put(fieldName, errorMessage);
         });
         
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .timestamp(LocalDateTime.now())
-                .status(HttpStatus.BAD_REQUEST.value())
-                .error(AppConstants.BAD_REQUEST_MESSAGE)
-                .message(AppConstants.VALIDATION_ERROR_MESSAGE)
-                .details(errors)
-                .build();
-                
-        return ResponseEntity.badRequest().body(errorResponse);
+        return ResponseEntity.badRequest()
+                .body(ApiResponse.<Map<String, String>>builder()
+                        .success(false)
+                        .code(400)
+                        .message(MessageConstants.ERROR_VALIDATION)
+                        .data(errors)
+                        .build());
     }
     
     @ExceptionHandler(BadCredentialsException.class)
     @ApiResponseGroups.AuthenticationErrorResponse
-    public ResponseEntity<ErrorResponse> handleBadCredentialsException(BadCredentialsException ex) {
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .timestamp(LocalDateTime.now())
-                .status(HttpStatus.UNAUTHORIZED.value())
-                .error(AppConstants.UNAUTHORIZED_MESSAGE)
-                .message(AppConstants.INVALID_CREDENTIALS_MESSAGE)
-                .build();
-                
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+    public ResponseEntity<ApiResponse<Void>> handleBadCredentialsException(BadCredentialsException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(ApiResponse.unauthorized(MessageConstants.AUTH_INVALID_CREDENTIALS));
     }
     
     @ExceptionHandler(UserNotFoundException.class)
     @ApiResponseGroups.NotFoundErrorResponse
-    public ResponseEntity<ErrorResponse> handleUserNotFoundException(UserNotFoundException ex) {
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .timestamp(LocalDateTime.now())
-                .status(HttpStatus.NOT_FOUND.value())
-                .error(AppConstants.NOT_FOUND_MESSAGE)
-                .message(ex.getMessage())
-                .build();
-                
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    public ResponseEntity<ApiResponse<Void>> handleUserNotFoundException(UserNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.notFound(ex.getMessage()));
     }
     
     @ExceptionHandler(RuntimeException.class)
     @ApiResponseGroups.RuntimeErrorResponse
-    public ResponseEntity<ErrorResponse> handleRuntimeException(RuntimeException ex) {
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .timestamp(LocalDateTime.now())
-                .status(HttpStatus.BAD_REQUEST.value())
-                .error(AppConstants.BAD_REQUEST_MESSAGE)
-                .message(ex.getMessage())
-                .build();
-                
-        return ResponseEntity.badRequest().body(errorResponse);
+    public ResponseEntity<ApiResponse<Void>> handleRuntimeException(RuntimeException ex) {
+        return ResponseEntity.badRequest()
+                .body(ApiResponse.badRequest(ex.getMessage()));
     }
     
     @ExceptionHandler(Exception.class)
     @ApiResponseGroups.ServerErrorResponse
-    public ResponseEntity<ErrorResponse> handleGenericException(Exception ex) {
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .timestamp(LocalDateTime.now())
-                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                .error(AppConstants.INTERNAL_SERVER_ERROR_MESSAGE)
-                .message(AppConstants.UNEXPECTED_ERROR_MESSAGE)
-                .build();
-                
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+    public ResponseEntity<ApiResponse<Void>> handleGenericException(Exception ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.internalServerError(MessageConstants.ERROR_SERVER));
     }
 }

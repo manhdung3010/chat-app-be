@@ -8,11 +8,13 @@ import com.chatapp.backend.auth.service.AuthenticationService;
 import com.chatapp.backend.common.annotations.ApiResponseGroups;
 import com.chatapp.backend.common.constants.AppConstants;
 import com.chatapp.backend.common.constants.HttpStatusCodes;
+import com.chatapp.backend.common.constants.MessageConstants;
+import com.chatapp.backend.common.dto.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,24 +30,28 @@ public class AuthenticationController {
     @PostMapping("/register")
     @Operation(summary = "Register a new user", description = "Create a new user account with username, email, and password")
     @ApiResponseGroups.AuthResponses
-    @ApiResponse(responseCode = HttpStatusCodes.OK, description = "User registered successfully")
-    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
-        return ResponseEntity.ok(authenticationService.register(request));
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = HttpStatusCodes.CREATED, description = "User registered successfully")
+    public ResponseEntity<ApiResponse<AuthResponse>> register(@Valid @RequestBody RegisterRequest request) {
+        AuthResponse authResponse = authenticationService.register(request);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.created(authResponse, MessageConstants.AUTH_REGISTER_SUCCESS));
     }
     
     @PostMapping("/login")
     @Operation(summary = "Login user", description = "Authenticate user with username/email and password")
     @ApiResponseGroups.AuthResponses
-    @ApiResponse(responseCode = HttpStatusCodes.OK, description = "User logged in successfully")
-    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
-        return ResponseEntity.ok(authenticationService.login(request));
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = HttpStatusCodes.OK, description = "User logged in successfully")
+    public ResponseEntity<ApiResponse<AuthResponse>> login(@Valid @RequestBody LoginRequest request) {
+        AuthResponse authResponse = authenticationService.login(request);
+        return ResponseEntity.ok(ApiResponse.success(authResponse, MessageConstants.AUTH_LOGIN_SUCCESS));
     }
     
     @PostMapping("/refresh")
     @Operation(summary = "Refresh access token", description = "Get new access token using refresh token")
     @ApiResponseGroups.AuthResponses
-    @ApiResponse(responseCode = HttpStatusCodes.OK, description = "Token refreshed successfully")
-    public ResponseEntity<AuthResponse> refreshToken(@Valid @RequestBody RefreshTokenRequest request) {
-        return ResponseEntity.ok(authenticationService.refreshToken(request));
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = HttpStatusCodes.OK, description = "Token refreshed successfully")
+    public ResponseEntity<ApiResponse<AuthResponse>> refreshToken(@Valid @RequestBody RefreshTokenRequest request) {
+        AuthResponse authResponse = authenticationService.refreshToken(request);
+        return ResponseEntity.ok(ApiResponse.success(authResponse, MessageConstants.AUTH_REFRESH_SUCCESS));
     }
 }

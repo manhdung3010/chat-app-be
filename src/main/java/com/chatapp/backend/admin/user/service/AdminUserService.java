@@ -3,7 +3,9 @@ package com.chatapp.backend.admin.user.service;
 import com.chatapp.backend.admin.user.dto.CreateUserRequest;
 import com.chatapp.backend.admin.user.dto.UpdateUserRequest;
 import com.chatapp.backend.admin.user.dto.UserDto;
+import com.chatapp.backend.common.constants.MessageConstants;
 import com.chatapp.backend.common.exception.UserNotFoundException;
+import com.chatapp.backend.user.entity.Role;
 import com.chatapp.backend.user.entity.User;
 import com.chatapp.backend.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -36,11 +38,11 @@ public class AdminUserService {
     public UserDto createUser(CreateUserRequest request) {
         // Check if user already exists
         if (userRepository.existsByUsername(request.getUsername())) {
-            throw new RuntimeException("Username already exists");
+            throw new RuntimeException(MessageConstants.ERROR_USERNAME_EXISTS);
         }
         
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email already exists");
+            throw new RuntimeException(MessageConstants.ERROR_EMAIL_EXISTS);
         }
         
         // Create new user
@@ -63,7 +65,7 @@ public class AdminUserService {
         // Check username uniqueness if changed
         if (request.getUsername() != null && !request.getUsername().equals(user.getUsername())) {
             if (userRepository.existsByUsername(request.getUsername())) {
-                throw new RuntimeException("Username already exists");
+                throw new RuntimeException(MessageConstants.ERROR_USERNAME_EXISTS);
             }
             user.setUsername(request.getUsername());
         }
@@ -71,7 +73,7 @@ public class AdminUserService {
         // Check email uniqueness if changed
         if (request.getEmail() != null && !request.getEmail().equals(user.getEmail())) {
             if (userRepository.existsByEmail(request.getEmail())) {
-                throw new RuntimeException("Email already exists");
+                throw new RuntimeException(MessageConstants.ERROR_EMAIL_EXISTS);
             }
             user.setEmail(request.getEmail());
         }
@@ -104,7 +106,7 @@ public class AdminUserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(id));
         
-        user.setRole(com.chatapp.backend.user.entity.Role.ADMIN);
+        user.setRole(Role.ADMIN);
         User updatedUser = userRepository.save(user);
         return mapToDto(updatedUser);
     }
@@ -113,7 +115,7 @@ public class AdminUserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(id));
         
-        user.setRole(com.chatapp.backend.user.entity.Role.USER);
+        user.setRole(Role.USER);
         User updatedUser = userRepository.save(user);
         return mapToDto(updatedUser);
     }

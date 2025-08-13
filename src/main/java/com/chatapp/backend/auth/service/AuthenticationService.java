@@ -5,6 +5,7 @@ import com.chatapp.backend.auth.dto.LoginRequest;
 import com.chatapp.backend.auth.dto.RegisterRequest;
 import com.chatapp.backend.auth.dto.RefreshTokenRequest;
 import com.chatapp.backend.auth.jwt.JwtService;
+import com.chatapp.backend.common.constants.MessageConstants;
 import com.chatapp.backend.user.entity.Role;
 import com.chatapp.backend.user.entity.User;
 import com.chatapp.backend.user.repository.UserRepository;
@@ -28,11 +29,11 @@ public class AuthenticationService {
     public AuthResponse register(RegisterRequest request) {
         // Check if user already exists
         if (userRepository.existsByUsername(request.getUsername())) {
-            throw new RuntimeException("Username already exists");
+            throw new RuntimeException(MessageConstants.ERROR_USERNAME_EXISTS);
         }
         
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email already exists");
+            throw new RuntimeException(MessageConstants.ERROR_EMAIL_EXISTS);
         }
         
         // Create new user
