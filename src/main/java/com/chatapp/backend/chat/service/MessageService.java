@@ -23,6 +23,7 @@ public class MessageService {
     
     private final MessageRepository messageRepository;
     private final UserRepository userRepository;
+    private final RoomService roomService;
     
     /**
      * Tạo tin nhắn mới
@@ -50,6 +51,12 @@ public class MessageService {
                 .build();
         
         Message savedMessage = messageRepository.save(message);
+        
+        // Cập nhật thời gian tin nhắn cuối cùng của room nếu có
+        if (request.getRoomId() != null) {
+            roomService.updateLastMessageTime(request.getRoomId());
+        }
+        
         return MessageResponse.fromEntity(savedMessage);
     }
     

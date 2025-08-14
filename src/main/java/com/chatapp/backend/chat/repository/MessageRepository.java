@@ -4,9 +4,11 @@ import com.chatapp.backend.chat.entity.Message;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -41,6 +43,8 @@ public interface MessageRepository extends JpaRepository<Message, UUID> {
     List<Message> findUnreadMessages(@Param("userId") UUID userId);
     
     // Đánh dấu tin nhắn đã đọc
+    @Modifying
+    @Transactional
     @Query("UPDATE Message m SET m.isRead = true WHERE m.receiver.id = :userId AND m.sender.id = :senderId")
     void markMessagesAsRead(@Param("userId") UUID userId, @Param("senderId") UUID senderId);
     
